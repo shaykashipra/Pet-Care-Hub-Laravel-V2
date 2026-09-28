@@ -1,0 +1,7 @@
+# Use this workspace to collaborate
+workspace:
+  id: e92e2df3-21df-4de7-8d75-59aef104eaa6
+
+localResources:
+  collections:
+    - ../PetCareHub_API.postman_collection.json

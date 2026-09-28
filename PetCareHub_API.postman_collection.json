@@ -1,0 +1,424 @@
+{
+  "info": {
+    "name": "PetCareHub REST API",
+    "description": "Complete REST API collection for PetCareHub Laravel application.\n\n**Base URL**: http://127.0.0.1:8000/api/v1\n\n**Auth**: After Login, copy the token and set it in the collection variable `{{token}}`.\nAll protected requests use `Authorization: Bearer {{token}}` automatically.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://127.0.0.1:8000/api/v1" },
+    { "key": "token",   "value": "PASTE_YOUR_JWT_TOKEN_HERE" }
+  ],
+  "item": [
+    {
+      "name": "🔐 Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/register" },
+            "body": {
+              "mode": "raw",
+              "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"fname\": \"John\",\n  \"lname\": \"Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\",\n  \"phone\": \"01712345678\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login (User)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.token) {",
+                  "  pm.collectionVariables.set('token', json.token);",
+                  "  console.log('Token saved:', json.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/login" },
+            "body": {
+              "mode": "raw",
+              "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login (Doctor)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/doctor/login" },
+            "body": {
+              "mode": "raw",
+              "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"email\": \"doctor@example.com\",\n  \"password\": \"password123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get My Profile (me)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/me" }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/auth/logout" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🐾 Pets",
+      "item": [
+        {
+          "name": "List All Pets (Public)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/pets?animal_type=dog&is_adopted=0",
+              "query": [
+                { "key": "animal_type", "value": "dog",     "description": "Filter by type: dog, cat, bird, rabbit, other" },
+                { "key": "is_adopted",  "value": "0",       "description": "0 = available, 1 = adopted" },
+                { "key": "search",      "value": "",        "description": "Search by pet name", "disabled": true },
+                { "key": "gender",      "value": "male",    "description": "male or female",     "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Single Pet (Public)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/pets/1" }
+          }
+        },
+        {
+          "name": "My Pets (Auth)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/pets/my/list" }
+          }
+        },
+        {
+          "name": "Add New Pet (Auth)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/pets" },
+            "body": {
+              "mode": "raw",
+              "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"pet_name\": \"Buddy\",\n  \"animal_type\": \"dog\",\n  \"age\": \"2 years\",\n  \"gender\": \"male\",\n  \"color\": \"golden\",\n  \"coat_length\": \"medium\",\n  \"description\": \"Friendly and playful golden retriever looking for a loving home.\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Pet (Auth - Owner Only)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/pets/1" },
+            "body": {
+              "mode": "raw",
+              "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"pet_name\": \"Buddy Updated\",\n  \"description\": \"Updated description for Buddy.\",\n  \"is_adopted\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Pet (Auth - Owner/Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/pets/1" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🩺 Doctors",
+      "item": [
+        {
+          "name": "List All Doctors (Public)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/doctors",
+              "query": [
+                { "key": "specialization", "value": "surgery", "disabled": true },
+                { "key": "search",         "value": "",        "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Single Doctor (Public)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/doctors/1" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📅 Appointments",
+      "item": [
+        {
+          "name": "List My Appointments (Auth)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/appointments",
+              "query": [
+                { "key": "status", "value": "pending", "disabled": true, "description": "pending, confirmed, completed, cancelled" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Single Appointment (Auth)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/appointments/1" }
+          }
+        },
+        {
+          "name": "Book Appointment (Auth - User)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/appointments" },
+            "body": {
+              "mode": "raw",
+              "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"doctor_id\": 1,\n  \"pet_name\": \"Buddy\",\n  \"contact\": \"01712345678\",\n  \"date\": \"2026-10-15\",\n  \"time\": \"10:00\",\n  \"symptoms\": \"Lethargy, loss of appetite for 2 days\",\n  \"category\": \"General Checkup\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Appointment Status (Auth - Doctor)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/appointments/1" },
+            "body": {
+              "mode": "raw",
+              "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"status\": \"confirmed\",\n  \"prescription\": \"Rest and fluids. Amoxicillin 250mg twice daily for 5 days.\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Cancel Appointment (Auth - User)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/appointments/1" },
+            "body": {
+              "mode": "raw",
+              "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"status\": \"cancelled\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Appointment (Auth - User/Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/appointments/1" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "❤️ Favourites",
+      "item": [
+        {
+          "name": "Get My Favourites (Auth)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/favourites" }
+          }
+        },
+        {
+          "name": "Add to Favourites (Auth)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/favourites/1" }
+          }
+        },
+        {
+          "name": "Remove from Favourites (Auth)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/favourites/1" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "👑 Admin",
+      "item": [
+        {
+          "name": "Dashboard Stats (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/admin/stats" }
+          }
+        },
+        {
+          "name": "List All Users (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/admin/users" }
+          }
+        },
+        {
+          "name": "Delete User (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/admin/users/1" }
+          }
+        },
+        {
+          "name": "List All Pets (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/admin/pets" }
+          }
+        },
+        {
+          "name": "Update Pet (Admin - Mark Adopted)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/admin/pets/1" },
+            "body": {
+              "mode": "raw",
+              "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"is_adopted\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Pet (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/admin/pets/1" }
+          }
+        },
+        {
+          "name": "List All Appointments (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/appointments",
+              "query": [
+                { "key": "status", "value": "pending", "disabled": true }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -13,6 +13,7 @@ class User extends Model
 
     protected $table='users';
     protected $primaryKey = 'id';
+    protected $hidden = ['password', 'remember_token'];
    
     public function pets()
     {
